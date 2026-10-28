@@ -1,12 +1,11 @@
 from pathlib import Path
 import shutil
 import tempfile
-
 from fastapi import FastAPI, File, UploadFile, HTTPException, Request
 from fastapi.responses import FileResponse
-
 from inference.pipeline import run_pipeline
-
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 
 app = FastAPI(
     title="MARIS Oil Spill Detection API",
@@ -17,11 +16,15 @@ app = FastAPI(
 
 @app.get("/")
 def root():
-    return {
-        "project": "MARIS",
-        "description": "Maritime Oil Spill Detection and Segmentation API",
-        "status": "running"
-    }
+    index_file = Path(__file__).resolve().parent.parent / "static" / "index.html"
+    if not index_file.exists():
+        return {
+            "project": "MARIS",
+            "description": "Maritime Oil Spill Detection and Segmentation API",
+            "status": "running",
+            "ui": "static/index.html not found"
+        }
+    return FileResponse(index_file)
 
 
 @app.get("/health")
@@ -146,3 +149,10 @@ def get_result_file(
     return FileResponse(
         file_path
     )
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+app.mount(
+    "/static",
+    StaticFiles(directory=BASE_DIR / "static"),
+    name="static"
+)
