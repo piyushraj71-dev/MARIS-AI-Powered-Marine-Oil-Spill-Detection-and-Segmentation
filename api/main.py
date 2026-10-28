@@ -149,10 +149,43 @@ def get_result_file(
     return FileResponse(
         file_path
     )
-BASE_DIR = Path(__file__).resolve().parent.parent
 
+BASE_DIR = Path(__file__).resolve().parent.parent
+SAMPLE_DIR = BASE_DIR / "sample_images"
+
+@app.get("/samples")
+def list_samples():
+    if not SAMPLE_DIR.exists():
+        return {"samples": []}
+
+    allowed_extensions = {".png", ".jpg", ".jpeg"}
+
+    samples = sorted(
+        file.name
+        for file in SAMPLE_DIR.iterdir()
+        if file.is_file() and file.suffix.lower() in allowed_extensions
+    )
+
+    return {"samples": samples}
+
+
+@app.get("/samples/{filename}")
+def get_sample(filename: str):
+    allowed_extensions = {".png", ".jpg", ".jpeg"}
+    sample_path = (SAMPLE_DIR / filename).resolve()
+
+    if (
+        sample_path.parent != SAMPLE_DIR.resolve()
+        or not sample_path.is_file()
+        or sample_path.suffix.lower() not in allowed_extensions
+    ):
+        from fastapi import HTTPException
+        raise HTTPException(status_code=404, detail="Sample image not found")
+
+    return FileResponse(sample_path)
 app.mount(
     "/static",
     StaticFiles(directory=BASE_DIR / "static"),
     name="static"
 )
+
