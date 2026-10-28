@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#081521">
+  <title>MARIS | Maritime Intelligence</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <a class="brand" href="/" aria-label="MARIS home">
+        <span class="brand-mark">≈</span>
+        <span><strong>MARIS</strong><small>MARITIME INTELLIGENCE</small></span>
+      </a>
+      <div class="nav-label">WORKSPACE</div>
+      <a class="nav-item active" href="#analysis"><span class="nav-icon">◈</span> Image analysis</a>
+      <a class="nav-item" href="#results"><span class="nav-icon">▧</span> Analysis results</a>
+      <div class="sidebar-bottom">
+        <div class="status-card">
+          <span class="status-dot"></span>
+          <div><strong>Inference API</strong><small id="apiStatus">Checking connection…</small></div>
+        </div>
+        <div class="sidebar-note">Satellite intelligence for a healthier ocean.</div>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <header class="topbar">
+        <div class="breadcrumb">Workspace <span>/</span> <strong>Oil spill analysis</strong></div>
+        <div class="topbar-right"><span class="live-indicator"></span> MODEL WORKSPACE <span class="version">v1.0</span></div>
+      </header>
+
+      <section class="hero">
+        <div>
+          <div class="eyebrow"><span class="eyebrow-line"></span> SATELLITE MONITORING SYSTEM</div>
+          <h1>See the signal.<br><span>Protect the sea.</span></h1>
+          <p class="hero-copy">Analyze Sentinel-1 SAR imagery with AI-powered oil-spill classification and pixel-level segmentation.</p>
+        </div>
+        <div class="hero-orbit" aria-hidden="true">
+          <div class="orbit orbit-one"></div><div class="orbit orbit-two"></div>
+          <div class="globe"><span>MARIS</span><i></i></div>
+          <div class="orbit-point"></div>
+        </div>
+      </section>
+
+      <section class="workspace-grid" id="analysis">
+        <article class="panel upload-panel">
+          <div class="panel-heading">
+            <div><div class="section-kicker">01 / INPUT</div><h2>Satellite image</h2></div>
+            <span class="small-tag">JPG · PNG</span>
+          </div>
+          <p class="muted">Upload a SAR scene to start an inference job.</p>
+
+          <label class="drop-zone" id="dropZone" for="imageInput">
+            <input id="imageInput" type="file" accept=".jpg,.jpeg,.png,image/jpeg,image/png">
+            <div class="upload-symbol"><span>↑</span></div>
+            <strong id="uploadTitle">Drop your image here</strong>
+            <span id="uploadSubtitle">or <em>browse files</em> from your device</span>
+            <small>Accepted formats: JPG, JPEG, PNG</small>
+          </label>
+
+          <div class="preview-wrap hidden" id="previewWrap">
+            <div class="preview-head"><span>INPUT PREVIEW</span><button class="text-button" id="removeImage" type="button">Remove</button></div>
+            <img id="inputPreview" alt="Selected satellite image preview">
+            <div class="file-meta"><span class="file-badge">IMG</span><span id="fileName">image.png</span><span id="fileSize"></span></div>
+          </div>
+
+          <button class="primary-button" id="analyzeButton" disabled>
+            <span class="button-icon">✦</span><span id="buttonText">Run oil-spill analysis</span><span class="button-arrow">↗</span>
+          </button>
+          <p class="privacy-note"><span>⌁</span> Image is processed by your MARIS inference API.</p>
+          <div class="error-box hidden" id="errorBox" role="alert"></div>
+        </article>
+
+        <article class="panel pipeline-panel">
+          <div class="panel-heading">
+            <div><div class="section-kicker">02 / PIPELINE</div><h2>Analysis sequence</h2></div>
+            <span class="pipeline-icon">⌘</span>
+          </div>
+          <p class="muted">Your image moves through the existing MARIS model pipeline.</p>
+          <div class="pipeline-steps">
+            <div class="pipeline-step" id="stepUpload"><div class="step-number">01</div><div class="step-copy"><strong>Image ingestion</strong><span>Validate and prepare image</span></div><span class="step-state">READY</span></div>
+            <div class="step-connector"></div>
+            <div class="pipeline-step" id="stepClassify"><div class="step-number">02</div><div class="step-copy"><strong>Oil-spill classification</strong><span>Classifier estimates oil probability</span></div><span class="step-state">WAITING</span></div>
+            <div class="step-connector"></div>
+            <div class="pipeline-step" id="stepSegment"><div class="step-number">03</div><div class="step-copy"><strong>U-Net segmentation</strong><span>Generate pixel-level spill mask</span></div><span class="step-state">CONDITIONAL</span></div>
+            <div class="step-connector"></div>
+            <div class="pipeline-step" id="stepReport"><div class="step-number">04</div><div class="step-copy"><strong>Spatial measurements</strong><span>Area, centroid, box and perimeter</span></div><span class="step-state">WAITING</span></div>
+          </div>
+          <div class="pipeline-foot"><span class="pulse"></span><span id="pipelineMessage">Ready when you are. Select an image to begin.</span></div>
+        </article>
+      </section>
+
+      <section class="results-section" id="results">
+        <div class="results-title">
+          <div><div class="section-kicker">03 / OUTPUT</div><h2>Analysis results</h2></div>
+          <span class="result-job" id="jobId">NO JOB RUN</span>
+        </div>
+
+        <div class="empty-state" id="emptyState">
+          <div class="empty-art"><span>◉</span><i></i></div>
+          <strong>Your analysis will appear here</strong>
+          <p>Upload a satellite image and run the model to see classification, segmentation and measurements.</p>
+        </div>
+
+        <div class="result-content hidden" id="resultContent">
+          <div class="result-banner" id="resultBanner">
+            <div class="result-symbol" id="resultSymbol">✓</div>
+            <div class="result-banner-copy"><span class="section-kicker">CLASSIFICATION RESULT</span><h3 id="resultHeading">Oil detected</h3><p id="resultDescription">The classifier identified a possible oil spill.</p></div>
+            <div class="probability"><span>OIL PROBABILITY</span><strong id="probabilityValue">—</strong><div class="probability-track"><span id="probabilityBar"></span></div></div>
+          </div>
+
+          <div class="metrics-grid">
+            <div class="metric-card"><span class="metric-label">SPILL AREA</span><strong id="spillArea">—</strong><small>As reported by pipeline</small></div>
+            <div class="metric-card"><span class="metric-label">CENTROID</span><strong class="metric-coordinate" id="centroid">—</strong><small>Image-coordinate estimate</small></div>
+            <div class="metric-card"><span class="metric-label">BOUNDING BOX</span><strong class="metric-coordinate" id="boundingBox">—</strong><small>Detected region bounds</small></div>
+            <div class="metric-card"><span class="metric-label">PERIMETER</span><strong id="perimeter">—</strong><small>As reported by pipeline</small></div>
+          </div>
+
+          <div class="visuals-grid">
+            <article class="visual-card"><div class="visual-heading"><div><span class="section-kicker">SEGMENTATION</span><h3>Predicted mask</h3></div><span class="visual-chip">MASK</span></div><div class="visual-stage" id="maskStage"><div class="image-placeholder">Segmentation not available for this result.</div></div><a class="download-link hidden" id="maskDownload" target="_blank" rel="noopener">Open mask ↗</a></article>
+            <article class="visual-card"><div class="visual-heading"><div><span class="section-kicker">DETECTION OVERLAY</span><h3>Spill highlighted</h3></div><span class="visual-chip red-chip">OVERLAY</span></div><div class="visual-stage" id="overlayStage"><div class="image-placeholder">Overlay not available for this result.</div></div><a class="download-link hidden" id="overlayDownload" target="_blank" rel="noopener">Open overlay ↗</a></article>
+          </div>
+          <div class="json-row"><div><strong>Raw pipeline result</strong><span>Inspect the JSON returned by the API.</span></div><a class="secondary-button" id="jsonLink" target="_blank" rel="noopener">View result JSON ↗</a></div>
+          <p class="disclaimer">Research/demo output only. Model predictions require human review and are not a substitute for authoritative environmental assessment.</p>
+        </div>
+      </section>
+      <footer><span>MARIS <b>·</b> Oil Spill Detection &amp; Segmentation</span><span>AI-assisted environmental monitoring</span></footer>
+    </main>
+  </div>
+  <script src="/static/script.js"></script>
+</body>
+</html>
