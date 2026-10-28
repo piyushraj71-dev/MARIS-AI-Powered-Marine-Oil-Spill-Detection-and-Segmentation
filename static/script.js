@@ -212,3 +212,87 @@ analyzeButton.addEventListener("click", async () => {
     setLoading(false);
   }
 });
+const sampleContainer = document.getElementById("sample-images");
+
+async function loadSampleImages() {
+    if (!sampleContainer) return;
+
+    try {
+        const response = await fetch("/samples");
+
+        if (!response.ok) {
+            throw new Error("Could not load sample images.");
+        }
+
+        const data = await response.json();
+        sampleContainer.replaceChildren();
+
+        if (!data.samples || data.samples.length === 0) {
+            sampleContainer.textContent = "No sample images found.";
+            return;
+        }
+
+        data.samples.forEach((filename) => {
+            const card = document.createElement("button");
+            card.type = "button";
+            card.className = "sample-card";
+
+            const image = document.createElement("img");
+            image.src = `/samples/${encodeURIComponent(filename)}`;
+            image.alt = `Sample SAR image: ${filename}`;
+
+            const caption = document.createElement("p");
+            caption.textContent = filename;
+
+            card.append(image, caption);
+
+            card.addEventListener("click", async () => {
+                try {
+                    const imageResponse = await fetch(image.src);
+
+                    if (!imageResponse.ok) {
+                        throw new Error("Could not load selected image.");
+                    }
+
+                    const blob = await imageResponse.blob();
+                    const file = new File([blob], filename, {
+                        type: blob.type || "image/png"
+                    });
+
+                    const transfer = new DataTransfer();
+                    transfer.items.add(file);
+
+                    const fileInput = document.querySelector(
+                        'input[type="file"]'
+                    );
+
+                    if (!fileInput) {
+                        throw new Error("Image upload input not found.");
+                    }
+
+                    fileInput.files = transfer.files;
+                    fileInput.dispatchEvent(
+                        new Event("change", { bubbles: true })
+                    );
+
+                    document.querySelectorAll(".sample-card").forEach((item) => {
+                        item.classList.remove("selected");
+                    });
+
+                    card.classList.add("selected");
+                } catch (error) {
+                    console.error(error);
+                    alert(error.message);
+                }
+            });
+
+            sampleContainer.appendChild(card);
+        });
+    } catch (error) {
+        console.error(error);
+        sampleContainer.textContent =
+            "Unable to load sample images. Please check the backend.";
+    }
+}
+
+loadSampleImages();
